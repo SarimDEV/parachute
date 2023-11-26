@@ -35,7 +35,7 @@ impl Parachute {
         }
     }
 
-    pub fn play_video_seq(&mut self, id: &str, path: &PathBuf) -> ProcessingState {
+    pub fn play_video_seq(&self, id: &str, path: &PathBuf) -> ProcessingState {
         self.id_to_process
             .entry(id.to_string())
             .or_insert_with(|| {
@@ -80,17 +80,3 @@ impl Parachute {
     }
 }
 
-// pub fn add(left: usize, right: usize) -> usize {
-//     left + right
-// }
-//
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//
-//     #[test]
-//     fn it_works() {
-//         let result = add(2, 2);
-//         assert_eq!(result, 4);
-//     }
-// }
