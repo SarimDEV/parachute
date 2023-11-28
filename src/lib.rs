@@ -3,6 +3,7 @@ mod manifest;
 mod processing;
 use dashmap::DashMap;
 use processing::Video;
+use serde::Serialize;
 use std::path::PathBuf;
 use std::process::Child;
 use std::sync::Arc;
@@ -12,7 +13,7 @@ use crate::ffprobe::{get_media_info, MediaInfo};
 use crate::manifest::{create_manifest_file, create_manifest_file_subs, create_master_file};
 use crate::processing::{process_video, Audio, Profile};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub enum ProcessingState {
     InProgress,
     Done,
