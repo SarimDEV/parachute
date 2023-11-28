@@ -44,8 +44,11 @@ impl Parachute {
                 let id = id.to_string();
                 let mut process = self.start_process(&id, &path);
                 thread::spawn(move || {
-                    let _ = process.wait();
+                    process
+                        .wait()
+                        .expect("Something wen't wrong while processing media");
                     id_to_process.insert(id, ProcessingState::Done);
+                    println!("Done processing media");
                 });
                 ProcessingState::InProgress
             })
@@ -80,4 +83,3 @@ impl Parachute {
         create_master_file(&manifest_path, &manifest_subs_path, &playlist_path).unwrap();
     }
 }
-
