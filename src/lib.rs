@@ -38,12 +38,12 @@ impl Parachute {
     }
 
     pub fn play_video_seq(&self, id: &str, path: &PathBuf) -> ProcessingState {
-        let id_to_process = self.id_to_process.clone();
         self.id_to_process
             .entry(id.to_string())
             .or_insert_with(|| {
                 let id = id.to_string();
                 let mut process = self.start_process(&id, &path);
+                let id_to_process = self.id_to_process.clone();
                 thread::spawn(move || {
                     process
                         .wait()
