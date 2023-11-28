@@ -17,6 +17,7 @@ use crate::processing::{process_video, Audio, Profile};
 pub enum ProcessingState {
     InProgress,
     Done,
+    NotStarted,
 }
 
 pub struct Parachute {
@@ -37,10 +38,10 @@ impl Parachute {
     }
 
     pub fn play_video_seq(&self, id: &str, path: &PathBuf) -> ProcessingState {
+        let id_to_process = self.id_to_process.clone();
         self.id_to_process
             .entry(id.to_string())
             .or_insert_with(|| {
-                let id_to_process = self.id_to_process.clone();
                 let id = id.to_string();
                 let mut process = self.start_process(&id, &path);
                 thread::spawn(move || {
