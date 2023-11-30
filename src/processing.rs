@@ -150,6 +150,7 @@ pub fn process_video(
 
     args.extend(&video_args);
     args.extend(&audio_args);
+    args.extend(&subtitle_args);
     args.extend([
         "-start_at_zero".into(),
         "-vsync".into(),
