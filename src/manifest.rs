@@ -74,7 +74,7 @@ pub fn create_master_file(
     let manifest_subs_path = manifest_subs_path.file_name().unwrap().to_str().unwrap();
     let manifest_path = manifest_path.file_name().unwrap().to_str().unwrap();
     // let str_to_write = format!("#EXTM3U\n#EXT-X-VERSION:4\n#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",URI=\"{}\"\n#EXT-X-STREAM-INF:BANDWIDTH=5438980,AVERAGE-BANDWIDTH=2868620,SUBTITLES=\"subs\",\n{}", manifest_subs_path, manifest_path);
-    let header = "EXTM3U\n#EXT-X-VERSION:4";
+    let header = "#EXTM3U\n#EXT-X-VERSION:4";
     let mut subtitles = String::new();
     if !no_subs {
         subtitles = format!("\n#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",URI=\"{}\"", manifest_subs_path);
