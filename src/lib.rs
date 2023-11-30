@@ -2,7 +2,7 @@ mod ffprobe;
 mod manifest;
 mod processing;
 use dashmap::DashMap;
-use processing::Video;
+use processing::{Subtitles, Video};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::process::Child;
@@ -60,6 +60,7 @@ impl Parachute {
         let media_info = get_media_info(&self.ffprobe_path, path).unwrap();
         let video_args = Video::get_args(&media_info);
         let audio_args = Audio::get_args(&media_info);
+        let subtitle_args = Subtitles::get_args(&media_info);
         self.create_files(id, &media_info);
         process_video(
             path,
@@ -68,6 +69,7 @@ impl Parachute {
             &self.ffmpeg_path,
             &video_args,
             &audio_args,
+            &subtitle_args,
         )
     }
 
@@ -81,6 +83,12 @@ impl Parachute {
 
         create_manifest_file(id, &manifest_path, duration, &init_seg).unwrap();
         create_manifest_file_subs(id, &manifest_subs_path, duration).unwrap();
-        create_master_file(&manifest_path, &manifest_subs_path, &playlist_path).unwrap();
+        create_master_file(
+            &manifest_path,
+            &manifest_subs_path,
+            &playlist_path,
+            media_info.subtitle.len() == 0,
+        )
+        .unwrap();
     }
 }

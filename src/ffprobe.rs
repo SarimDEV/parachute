@@ -1,5 +1,5 @@
-use std::{error::Error, process::Command, path::PathBuf};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::{error::Error, path::PathBuf, process::Command};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FFPFormat {
@@ -10,7 +10,8 @@ pub struct FFPFormat {
     pub start_time: String,
     pub duration: String,
     pub size: String,
-    pub bit_rate: String, }
+    pub bit_rate: String,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FFPStream {
@@ -37,15 +38,18 @@ pub struct Audio {
     pub duration: f32,
 }
 
+#[derive(Debug)]
+pub struct Subtitle {
+    pub codec_name: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FFprobe {
     pub format: FFPFormat,
     pub streams: Vec<FFPStream>,
 }
 
-
 pub fn ffprobe(ffprobe_path: &str, path: &PathBuf) -> Result<FFprobe, Box<dyn Error>> {
-    // let media_path = format!("{MEDIA_DIR}/{media}");
     let output = Command::new(ffprobe_path)
         .arg("-v")
         .arg("error")
@@ -65,12 +69,14 @@ pub struct MediaInfo {
     pub format: FFPFormat,
     pub video: Vec<Video>,
     pub audio: Vec<Audio>,
+    pub subtitle: Vec<Subtitle>,
 }
 
 pub fn get_media_info(ffprobe_path: &str, path: &PathBuf) -> Result<MediaInfo, Box<dyn Error>> {
     let metadata = ffprobe(ffprobe_path, path).expect("Unable to get media info");
     let mut videos: Vec<Video> = Vec::new();
     let mut audios: Vec<Audio> = Vec::new();
+    let mut subtitles: Vec<Subtitle> = Vec::new();
 
     for stream in metadata.streams.into_iter() {
         match stream.codec_type.as_str() {
@@ -105,6 +111,12 @@ pub fn get_media_info(ffprobe_path: &str, path: &PathBuf) -> Result<MediaInfo, B
                 };
                 audios.push(audio)
             }
+            "subtitle" => {
+                let subtitle = Subtitle {
+                    codec_name: stream.codec_name,
+                };
+                subtitles.push(subtitle)
+            }
             _ => {}
         }
     }
@@ -113,6 +125,6 @@ pub fn get_media_info(ffprobe_path: &str, path: &PathBuf) -> Result<MediaInfo, B
         format: metadata.format,
         video: videos,
         audio: audios,
+        subtitle: subtitles,
     })
 }
-

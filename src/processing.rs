@@ -85,6 +85,40 @@ impl Profile for Audio {
     }
 }
 
+pub struct Subtitles;
+
+impl Profile for Subtitles {
+    fn transmux(stream_idx: u8) -> Vec<String> {
+        println!("transmux subtitles");
+        [
+            "-map",
+            format!("0:a:{}", stream_idx).as_str(),
+            "-c:s",
+            "copy",
+        ]
+        .into_iter()
+        .map(String::from)
+        .collect()
+    }
+
+    fn transcode() -> Vec<String> {
+        println!("transcode subtitles");
+        ["-map", "0:s:0", "-c:s", "webvtt"]
+            .into_iter()
+            .map(String::from)
+            .collect()
+    }
+
+    fn get_args(media_info: &MediaInfo) -> Vec<String> {
+        let subtitle_streams = &media_info.subtitle;
+        if subtitle_streams.len() == 0 {
+            return Vec::new();
+        }
+
+        Self::transcode()
+    }
+}
+
 pub fn process_video(
     input: &PathBuf,
     id: &str,
@@ -92,6 +126,7 @@ pub fn process_video(
     ffmpeg_path: &str,
     video_args: &Vec<String>,
     audio_args: &Vec<String>,
+    subtitle_args: &Vec<String>,
 ) -> Child {
     let media_file_path = input.to_string_lossy().to_string();
     let init_seg = format!("{id}_init.mp4");
@@ -111,6 +146,7 @@ pub fn process_video(
 
     let video_args: Vec<&str> = video_args.iter().map(|s| s.as_str()).collect();
     let audio_args: Vec<&str> = audio_args.iter().map(|s| s.as_str()).collect();
+    let subtitle_args: Vec<&str> = subtitle_args.iter().map(|s| s.as_str()).collect();
 
     args.extend(&video_args);
     args.extend(&audio_args);
@@ -142,8 +178,6 @@ pub fn process_video(
         &segment_file_path,
         &output_file_path,
     ]);
-
-
 
     // let args = vec![
     //     "-v",

@@ -1,4 +1,4 @@
-use std::{path::PathBuf, fs::File, io::Write};
+use std::{fs::File, io::Write, path::PathBuf};
 
 pub fn create_manifest_file_subs(
     id: &str,
@@ -51,9 +51,9 @@ pub fn create_manifest_file(
 
     let remainder_str = {
         if remainder == 0.0 {
-            format!("#EXTINF: 10.000000,\n{}_{}.m4s", id, chunks-1)
+            format!("#EXTINF: 10.000000,\n{}_{}.m4s", id, chunks - 1)
         } else {
-            format!("#EXTINF: {:.6},\n{}_{}.m4s", remainder, id, chunks-1)
+            format!("#EXTINF: {:.6},\n{}_{}.m4s", remainder, id, chunks - 1)
         }
     };
 
@@ -68,12 +68,22 @@ pub fn create_master_file(
     manifest_path: &PathBuf,
     manifest_subs_path: &PathBuf,
     playlist_path: &PathBuf,
+    no_subs: bool,
 ) -> std::io::Result<()> {
     let mut file_buffer = File::create(&playlist_path)?;
     let manifest_subs_path = manifest_subs_path.file_name().unwrap().to_str().unwrap();
     let manifest_path = manifest_path.file_name().unwrap().to_str().unwrap();
-
-    let str_to_write = format!("#EXTM3U\n#EXT-X-VERSION:4\n#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",URI=\"{}\"\n#EXT-X-STREAM-INF:BANDWIDTH=5438980,AVERAGE-BANDWIDTH=2868620,SUBTITLES=\"subs\",\n{}", manifest_subs_path, manifest_path);
+    // let str_to_write = format!("#EXTM3U\n#EXT-X-VERSION:4\n#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",URI=\"{}\"\n#EXT-X-STREAM-INF:BANDWIDTH=5438980,AVERAGE-BANDWIDTH=2868620,SUBTITLES=\"subs\",\n{}", manifest_subs_path, manifest_path);
+    let header = "EXTM3U\n#EXT-X-VERSION:4";
+    let mut subtitles = String::new();
+    if !no_subs {
+        subtitles = format!("\n#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",URI=\"{}\"", manifest_subs_path);
+    }
+    let manifest_str = format!(
+        "\n#EXT-X-STREAM-INF:BANDWIDTH=5438980,AVERAGE-BANDWIDTH=2868620,SUBTITLES=\"subs\",\n{}",
+        manifest_path
+    );
+    let str_to_write = format!("{}{}{}", header, subtitles, manifest_str);
     write!(file_buffer, "{}", str_to_write)?;
     Ok(())
 }
